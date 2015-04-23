@@ -33,9 +33,10 @@ function addAnswer($QID,$AID,$UVID)
 	}
 	else
 	{
+		$Selection = $_SESSION['Selection'];
 		//if not exists, add to database //////////warning using survey 1\\\\\\\\\\\\\\\\\
 		//echo "Answer does not exists in database, adding it to database<br>";
-		$addAnsQues = "INSERT INTO UserAnswer (idAnswer, idQuestion, idUser, idSurvey) VALUES ($AID,$QID,$UVID,1)";
+		$addAnsQues = "INSERT INTO UserAnswer (idAnswer, idQuestion, idUser, idSurvey) VALUES ($AID,$QID,$UVID,$Selection)";
 		$conn->query($addAnsQues);
 		 return;
 	}
@@ -46,12 +47,16 @@ function addAnswer($QID,$AID,$UVID)
 //get results from characterisitcs
 if(isset($_POST["submitSurvey"]))
 {
+	$Selection = $_SESSION['Selection'];
+	$sectionNum = $_SESSION['sectionNum'];
 	////////////////////////WARNING WARNING WARNING USING SURVEY # 1 in this example, make sure you set it to recieve idSurvey from $_POST\\\\\\\\\\\\\\\\\\\\\\\\\\\
 	$sqlGetQuestions = "SELECT *,a.idQuestion as aid, b.idQuestion as bid, a.description as adescription, b.description as bdescription,
- 	b.idAnswer as ansId from Question a INNER JOIN Answer b on  a.idQuestion = b.idQuestion where idSurvey = 1  order by a.idQuestion, b.idAnswer";
+ 	b.idAnswer as ansId from Question a INNER JOIN Answer b on  a.idQuestion = b.idQuestion where idSurvey = $Selection  order by a.idQuestion, b.idAnswer";
  //sql user Answers
  //query results
  	include('ConnectToDb.php');
+	$StudentSurvey = "insert into StudentSurvey (idUser,idSurvey,remove,SectionNum,dateTaken) values ($uvid,$Selection,0,\"$sectionNum\",CurDate())"; 
+	$result = $conn->query($StudentSurvey);
 	$result = $conn->query($sqlGetQuestions);
 	if ($result->num_rows > 0) {
 	$noRepeat = false;
@@ -97,20 +102,12 @@ if(isset($_POST["submitSurvey"]))
 
 if($returnIndex == true)
 {
-	include('ConnectToDb.php');
-	include('GetUserLevel.php');
-	if($userLevel == 'New')
-	{
-		$sql = "UPDATE User set UserType = \"Participant\" where uvuID = $uvid"; 
-		$conn->query($sql);
-		
-	}
 	echo"<script>window.location.href = \"index.php\";</script>";
 }
-else if($returnIndex == false)
+else
 {
 	//return to last User Survey(currently characterisitcs)
-	echo"<script>window.location.href = \"characteristics.php\";</script>";
+	echo"<script>window.location.href = \"takeSurvey.php\";</script>";
 }
 
 //if user has any missed questions, reroute back to characterisitcs.php

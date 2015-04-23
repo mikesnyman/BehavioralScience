@@ -48,13 +48,13 @@ if (isset($_POST['editSurvey'])) {
      	echo "
 		<form action ='filter.php' method = 'post'>
 		<input type='hidden' name='varname' value='".$row["idSurvey"]."'>		  
-		<input type='submit' name = 'filter' value='Add Filter'>
+		<input type='submit' class=\"cBtn\"  name = 'filter' value='Add Filter'>
 		</form>";
 
         echo "
         <form action ='editSurvey.php' method = 'post'>
         <input type='hidden' name='varname' value='".$row["idSurvey"]."'>         
-        <input type='submit' name = 'edit' value='Edit Survey'>
+        <input type='submit' class=\"cBtn\"  name = 'edit' value='Edit Survey'>
         </form>";
      	}
      }
@@ -69,7 +69,7 @@ if (isset($_POST['createSurvey'])) {
     echo "TextBox to enter survey name<br/>";
     echo "<form action ='surveycreation.php' method = 'post'>
     <input type = 'text' name = 'surveyName'>
-    <input type='submit' name = 'submit' value='Submit'>
+    <input type='submit' class=\"cBtn\"  name = 'submit' value='Submit'>
     </form>";
 
     
@@ -79,10 +79,10 @@ if (isset($_POST['createSurvey'])) {
 
 ?>
 <form action="surveyedit.php" method = "post">
-<input type="submit" name="editSurvey" value="Edit Surveys" />
-<input type="submit" name="createSurvey" value="Create Survey" />
+<input type="submit" class="cBtn"  name="editSurvey" value="Edit Surveys" />
+<input type="submit" class="cBtn"  name="createSurvey" value="Create Survey" />
 </form>
-<input type="button" value="Back" onclick="location='index.php'" />
+<input type="button" class="cBtn" value="Back" onclick="location='index.php'" />
 
 <?php
 include('footer.php');

@@ -25,7 +25,7 @@ if ($result->num_rows > 0)
 }
 if($userLevel != 'Admin')
 {
-	if($userLevel != 'Researcher')
+	if($userLevel != 'Researcher' && $userLevel != 'Teacher')
 	{
 		echo"<script>window.location.href = \"index.php\";</script>";
 		exit();
@@ -33,24 +33,63 @@ if($userLevel != 'Admin')
 	
 }
 ?>
-<h2>Edit Survey</h2>
+<input type="button" class = "cBtn fRight" value="Back" onclick="location='surveyeditfilter.php'" />
+<input type="button" class = "cBtn fRight" value="Home" onclick="location='index.php'" />
+<h2>Edit Study</h2><hr/>
 
 <?php
 
-if($_POST['id'] || isset($_POST['id']))
+	$_SESSION['varname2'] = $_SESSION['idSurvey'];
+
+
+if( isset($_POST['id']))
 {
 
 	//$var_value = $_POST['varname'];
 	$var_value = htmlspecialchars($_POST["id"]);
 	$_SESSION['varname2'] = $var_value;
 	//echo $var_value;
+	
+	
+$sNum =  $_SESSION['varname2'];
+
+include('ConnectToDb.php');
+  $sql = "select description, SurveyType from Survey where idSurvey = $sNum";
+  $result = $conn->query($sql);
+	if ($result->num_rows > 0) {
+		  while($row = $result->fetch_assoc())
+		  {
+			$_SESSION['SType']= $row["SurveyType"];
+			$_SESSION['sName'] = $row["description"];   
+		  }
+	  }
 }
+$sName = $_SESSION['sName'];
+$sNum =  $_SESSION['varname2'];
+$Type = $_SESSION['SType'];
+	echo "<h3>".$sName."</h3><br />";
+echo '<form id="Addbtn" class="" action="editSurvey.php" method = "post">
+<input type="submit" class = "cBtn fLeft" name="addQuestion" value="Add Question" />
+<input type="submit" class = "cBtn fLeft" name="deleteQuestion" value="Delete Question" />
+</form>';
+if($Type ==0){
+ echo '<input type = "button" class="cBtn fLeft" name ="AddFilter" value="Set Filter" onclick =QualtricsfilterSelect('.$sNum.')><br /><br /><br />';
+}
+else{
+ echo '<input type = "button" class="cBtn fLeft" name ="AddFilter" value="Set Filter" onclick =filterSelect('.$sNum.')><br /><br /><br />';
+}
+
+
+
 $teh = "";
 $counter = 0;
 $sNum =  $_SESSION['varname2'];
 //connect to database
 include('ConnectToDb.php');
 //show questions and answers
+?>
+<div class = "fLeft half">
+<?php
 $sql = "SELECT *,a.idQuestion as aid, b.idQuestion as bid, a.description as adescription, b.description as bdescription from Question a 
 INNER JOIN Answer b on  a.idQuestion = b.idQuestion where idSurvey = $sNum  order by a.idQuestion ASC ,b.idAnswer";
 $result = $conn->query($sql);
@@ -60,22 +99,69 @@ if ($result->num_rows > 0) {
 	  	if( $row["adescription"] != $teh)
      	{
      		$counter++;
-     		 echo "#".$counter." Question: ". $row["adescription"]."<br/>";
+     		 echo "<br /><strong>".$counter.". &nbsp&nbsp</strong>". $row["adescription"]."<br/>";
      		 //$test = str_replace(' ', '^*^',$test);
      	}
      	$teh = $row["adescription"];       
-      	echo $row["bdescription"]."<br/>";
+      	echo "<span class = 'padL'>".$row["bdescription"]."</span><br/>";
       	
 	  }
 
   }
 echo "<hr/>";
+?>
+</div>
+<script type="text/javascript">
+function showHide(){
+	 var j = document.getElementById("Addbtn");
+	 if(j.className == ""){
+	 j.className = "hide";
+	 }
+	 else {
+		j.className = "hide";
+	 }
+ }
+ 
+function filterSelect($SID){
+    var form = document.createElement("form");
+    input = document.createElement("input");
+
+form.action = "filter.php";
+form.method = "post"
+
+input.name = "id";
+input.value = $SID;
+form.appendChild(input);
+
+document.body.appendChild(form);
+form.submit();
+}
+
+function QualtricsfilterSelect($SID){
+    var form = document.createElement("form");
+    input = document.createElement("input");
+
+form.action = "filterMySurvey.php";
+form.method = "post"
+
+input.name = "id";
+input.value = $SID;
+form.appendChild(input);
+
+document.body.appendChild(form);
+form.submit();
+}
+
+</script>
+<?php
  if(isset($_POST['add']))
 {
 //session_start();
 $sNum =  $_SESSION['varname2'];
 
-
+echo"<script type=\"text/javascript\">
+showHide();
+</script>";
 include('ConnectToDb.php');
 //echo "before prepare";
 $question = $_POST['question'];
@@ -153,31 +239,41 @@ $conn->query($sql);
 }
 $conn->close();
 echo"<script>window.location.href = \"editSurvey.php\";</script>";
+	//echo "<form action ='editSurvey.php' method = 'post'>";
 		exit();
 
 } 
 //add question/answer
 if (isset($_POST['addQuestion'])) {
+?>
+<div class = "fRight half">
+<?php
+
+echo"<script type=\"text/javascript\">
+showHide();
+</script>";
     echo"<h3>Add a Question</h3><br/>";
 
 echo "<form action= '' method='post'>
-Question: &nbsp; <input type='text' name='question' />
+Question: &nbsp; <input class = 'fRight largeInput' type='text' name='question' />
 <br /><br/>
-Answer One: &nbsp; <input type='text' name='ans1' />
+Answer One: &nbsp; <input class = 'fRight largeInput' type='text' name='ans1' />
 <br /><br/>
-Answer Two: &nbsp; <input type='text' name='ans2' />
+Answer Two: &nbsp; <input class = 'fRight largeInput' type='text' name='ans2' />
 <br /><br/>
-Answer Three: &nbsp; <input type='text' name='ans3' />
+Answer Three: &nbsp; <input class = 'fRight largeInput' type='text' name='ans3' />
 <br /><br/>
-Answer Four: &nbsp; <input type='text' name='ans4' />
+Answer Four: &nbsp; <input class = 'fRight largeInput' type='text' name='ans4' />
 <br /><br/>
-Answer Five: &nbsp; <input type='text' name='ans5' />
+Answer Five: &nbsp; <input class = 'fRight largeInput' type='text' name='ans5' />
 <br /><br/>
-Answer Six: &nbsp; <input type='text' name='ans6' />
+Answer Six: &nbsp; <input class = 'fRight largeInput' type='text' name='ans6' />
 <br /><br/>
-<input type='submit' name='add' value = 'Submit'/>
+<input type='submit' class = \"cBtn\" name='add' value = 'Submit'/>
 </form><br/>";
-
+?>
+</div>
+<?php
     
 }
 //edit question/answer
@@ -233,19 +329,17 @@ if ($result->num_rows > 0) {
 
 if(isset($_POST['deleteQuestion']))
 {
+echo"<script type=\"text/javascript\">
+showHide();
+</script>";
 	echo "Enter the question Number to remove<br/>";
     echo "<form action ='editSurvey.php' method = 'post'>
     <input type = 'text' name = 'questionDel'>
-    <input type='submit' name = 'submit' value='Submit'>
+    <input type='submit' class = \"cBtn\" name = 'submit' value='Submit'>
     </form><br/>";
 }
 ?>
 
-<form action="editSurvey.php" method = "post">
-<input type="submit" name="addQuestion" value="Add Question" />
-<input type="submit" name="deleteQuestion" value="Delete Question" />
-</form>
-<input type="button" value="Back" onclick="location='surveyedit.php'" />
 
 <?php
 include('footer.php');

@@ -2,8 +2,8 @@
 <?php
 include('header.php');
 ?>
-<input type="button" class = "cBtn" value="Home" onclick="location='index.php'" />
-<h2>Characteristics Questions Edit Page</h2><br>
+<input type="button" class = "cBtn fRight" value="Home" onclick="location='index.php'" />
+<h2>Characteristics Questions Edit Page</h2><hr />
 
 <?php
 include('ConnectToDb.php');
@@ -164,10 +164,10 @@ $QuestionAnswers='';
             $QuestionName = $row['description'];          
             $QID = $row['idQuestion'];         
              
-            $QuestionAnswers.= "<div class =\"innerRow selectRow\">
-            <span class=\"inline\"><strong>$QuestionName</strong></span>        
-            <span class=\"inline\" onclick =\"editSelect($QID)\">Edit</span>            
-            <span class=\"inline\" onclick =\"deleteSelect($QID)\">Delete Question</span></div>";
+            $QuestionAnswers.= "<div class =\"innerRow\">
+            <span class=\"inline fifty\"><strong>$QuestionName</strong></span>        
+            <span class=\"inline selectRow\" onclick =\"editSelect($QID)\">| Edit |</span>            
+            <span class=\"inline selectRow\" onclick =\"deleteSelect($QID)\">| Delete Question |</span></div>";
         }
     }    
 
@@ -184,20 +184,20 @@ function createChara()
 
 
 echo "<form action= '' method='post'>
-Question: &nbsp; <input type='text' name='question' />
-<br />
-Answer One: &nbsp; <input type='text' name='ans1' />
-<br />
-Answer Two: &nbsp; <input type='text' name='ans2' />
-<br />
-Answer Three: &nbsp; <input type='text' name='ans3' />
-<br />
-Answer Four: &nbsp; <input type='text' name='ans4' />
-<br />
-Answer Five: &nbsp; <input type='text' name='ans5' />
-<br />
-Answer Six: &nbsp; <input type='text' name='ans6' />
-<br />
+Question: &emsp; <input type='text' name='question' />
+<br /><br />
+Answer One: &emsp; <input type='text' name='ans1' />
+<br /><br />
+Answer Two: &emsp; <input type='text' name='ans2' />
+<br /><br />
+Answer Three: &emsp; <input type='text' name='ans3' />
+<br /><br />
+Answer Four: &emsp; <input type='text' name='ans4' />
+<br /><br />
+Answer Five: &emsp; <input type='text' name='ans5' />
+<br /><br />
+Answer Six: &emsp; <input type='text' name='ans6' />
+<br /><br />
 <input type='submit' class = \"cBtn\" name='submit' />
 </form>";
 }

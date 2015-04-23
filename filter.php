@@ -26,7 +26,7 @@ if ($result->num_rows > 0)
 }
 if($userLevel != 'Admin')
 {
-	if($userLevel != 'Researcher')
+	if($userLevel != 'Researcher' && $userLevel != 'Teacher')
 	{
 		echo"<script>window.location.href = \"index.php\";</script>";
 		exit();
@@ -34,8 +34,10 @@ if($userLevel != 'Admin')
 	
 }
 ?>
-<h2>Survey Filter</h2>
-<p>Select the answers for the filter.</p>
+<input type="button" class = "cBtn fRight" value="Back" onclick="location='surveyeditfilter.php'" />
+<input type="button" class = "cBtn fRight" value="Home" onclick="location='index.php'" />
+<h2>Study Filter</h2><hr/>
+
 <?php
 //from post get survey name (survey id most likely) for the the filter to be attached to. 
 
@@ -50,9 +52,16 @@ if(isset($_POST['id']))
 $var_value = htmlspecialchars($_POST["id"]);
     $_SESSION['varname2'] = $var_value;
 	//echo $var_value;
+	$_SESSION['idSurvey'] =($_POST['id']);
 }
-
+$idSurvey = $_SESSION['idSurvey'];
 //if filter exists already for this survey, do we update the filter and display a warning to the researcher?
+
+echo "<form action=\"filter.php\" method = \"post\">
+<input type=\"submit\" class=\"cBtn\" name=\"selectAll\" value=\"select All\" />
+<input type=\"submit\" class=\"cBtn\" name=\"deselectAll\" value=\"deselect All\" />
+</form>";
+
 
 //for now work on survey id # 1, the characteristics profile
 
@@ -61,11 +70,14 @@ include('ConnectToDb.php');
 
 //populate a list of questions and answers, EACH with a check box
 //next update precheck list if its already been checked 
-$sql = "SELECT *,a.idQuestion as aid, b.idQuestion as bid, a.description as adescription, b.description as bdescription from Question a 
-INNER JOIN Answer b on  a.idQuestion = b.idQuestion where idSurvey = 1  order by a.idQuestion ASC ,b.idAnswer";
+$sql = "select a.idAnswer, q.idQuestion, q.idSurvey, a.description as AnsDesc, q.description as QueDesc from Answer a 
+inner join Question q on a.idQuestion = q.idQuestion where q.idSurvey =1  order by q.idQuestion ASC ,a.idAnswer ASC";
 $result = $conn->query($sql);
 $teh = "";
 $test = "";
+$idAns ="";
+$idSur ="";
+$idQue ="";
 
 
 if ($result->num_rows > 0) {
@@ -74,29 +86,77 @@ if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc())
      {	 
 
-     	if( $row["adescription"] != $teh)
+     	if( $row["QueDesc"] != $teh)
      	{
-     		$test = $row["adescription"];
-     		 echo "Question: ". $row["adescription"]."<br>";
+     		$test = $row["QueDesc"];
+     		 echo "<hr /><strong>". $row["QueDesc"]."</strong><br>";
      		 //$test = str_replace(' ', '^*^',$test);
      	}
-     	$teh = $row["adescription"];       
+     	$teh = $row["QueDesc"];       
       	//echo $row["bdescription"];
-      	$ans = $row["bdescription"];
-     	$num = $row["idAnswer"];
-   
-      	echo " 
-	 {$row['bdescription']}   <input type=\"checkbox\" value=\"".$ans.$test."\" name=\"checkbox[]\" /><br />";  
+      	$ans = $row["AnsDesc"];
+		$idAns =  $row["idAnswer"];
+		$idSur =  $row["idSurvey"];
+		$idQue =  $row["idQuestion"];
+		$checkBoxValue = $idAns.$idQue;
+		
+		$Query = "Select idAnswer, idQuestion from SurveyQualification where idSurvey = $idSurvey and idQuestion = $idQue";
+		$fResult = $conn->query($Query);
+		
+		//creates checkbox
+		echo " {$row['AnsDesc']}   <input type=\"checkbox\" value=\"".$checkBoxValue."\" name=\"checkbox[]\"";
+		
+		if ($fResult->num_rows > 0) {
+			while($frow = $fResult->fetch_assoc()){
+				$filterAnswer = $frow["idAnswer"];
+				$filterQuestion = $frow["idQuestion"];
+				$SurveyFilter = $filterAnswer.$filterQuestion;	
+//puts chechs in boxes			 	
+				if($checkBoxValue ==$SurveyFilter) echo 'checked="checked"';  
+			}
+		}	
+		//end checkboxes
+		echo "/>";
+		
+		echo "<br />";  
 
      	echo "<br/>";
-
-
+		$filterQuestion="";
+		$SurveyFilter ="";
+		$filterAnswer ="";
     }
 
-    echo "<input type = \"submit\" value = \"Submit\">";
+    echo "<hr /><input type = \"submit\" class='cBtn' value = \"Submit\">";
      echo "</form>";   
 } else {
     echo "0 results found";
+}
+
+if(isset($_POST['deselectAll']))
+{
+	$AllChar = "delete from SurveyQualification where idSurvey = $idSurvey ";
+	$result = $conn->query($AllChar);
+	echo"<script>window.location.href = \"filter.php\";</script>";
+}
+
+if(isset($_POST['selectAll']))
+{
+	$idSurvey = $_SESSION['idSurvey'];
+	$AllChar = 'select a.idQuestion, a.idAnswer from Answer a inner join Question q on q.idQuestion = a.idQuestion where q.idSurvey = 1 order by q.idQuestion';
+	$result = $conn->query($AllChar);
+
+	if ($result->num_rows > 0) {
+		// output data of each row  	
+		while($row = $result->fetch_assoc())
+		{
+			$Que = $row["idQuestion"];
+			$Ans = $row["idAnswer"];
+			$insertAll = "insert into SurveyQualification (idSurvey,idAnswer,idQuestion) values ($idSurvey,$Ans,$Que)";
+			$Aresult = $conn->query($insertAll);
+		echo"<script>window.location.href = \"filter.php\";</script>";
+
+		}
+	}	 
 }
 
 
@@ -118,12 +178,12 @@ if(isset($_POST['checkbox']))
  	
  while($row2 = $result->fetch_assoc())
      {	
-     	$compare = $row2["bdescription"].$row2["adescription"];
-     	
-     	//echo $checkbox . ' ';
+     	$compare = $row2["idAnswer"].$row2["idQuestion"];
+     	echo $compare;
+     	echo "   ".$checkbox ."<br />";
      	//echo "the compare is".$compare;
      	$ansNum = $row2["idAnswer"];
-     	$quesNum = $row2["aid"];
+     	$quesNum = $row2["idQuestion"];
      	$sqlInsert = "INSERT INTO SurveyQualification (idSurvey, idAnswer, idQuestion) VALUES ($sNum, $ansNum, $quesNum)";
      	if($compare == $checkbox)
      	{
@@ -143,7 +203,7 @@ if(isset($_POST['checkbox']))
  // {
  // 	echo $value."<br/>";
  // }
- echo"<script>window.location.href = \"surveyedit.php\";</script>";
+ echo"<script>window.location.href = \"surveyeditfilter.php\";</script>";
 }
  
 //User checks boxes they want to be part of the filter, multiple answers from same question is permitable.

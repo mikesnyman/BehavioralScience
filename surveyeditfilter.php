@@ -4,8 +4,9 @@ include('header.php');
 include('ConnectToDb.php');
 include('GetUserLevel.php');
 if($userLevel =="Teacher" || $userLevel =="Researcher" || $userLevel =="Admin"){
-echo "<h2>Survey Edit Page</h2><br>";
-$sql = "SELECT description,idSurvey from Survey where idResearcher = $uvid";
+echo '<input type="button" class = "cBtn fRight" value="Home" onclick="location=\'index.php\'" />';
+echo "<h2>Study Edit Page</h2><hr />";
+$sql = "SELECT description,SurveyType, idSurvey from Survey where idResearcher = $uvid";
 $resultMe = $conn->query($sql);
     $ResearchSurvey='';
     if ($resultMe->num_rows > 0){
@@ -14,14 +15,20 @@ $resultMe = $conn->query($sql);
          {
             $Survey = $row['description'];
             $SID = $row['idSurvey'];
-            $ResearchSurvey.= "<div class =\"innerRow selectRow\"><p>Survey Name</p><span class=\"inline\">$Survey</span><span class=\"inline\" onclick =\"testSelect($SID)\">Edit Survey</span><span class=\"inline\" onclick =\"filterSelect($SID)\">Add Filter</span><span class=\"inline\" onclick =\"deleteSelect($SID)\">Delete Survey</span></div>";
+            $Type = $row['SurveyType'];
+			if($Type == 0){
+			$ResearchSurvey.= "<div class =\"innerRow\"><span class=\"fifty padL\">$Survey</span><span class=\"padL selectRow\" onclick =\"testSelect($SID)\">|  Edit Study  |</span><span class=\"padL selectRow\" onclick =\"QualtricsfilterSelect($SID)\">|  Add Filter  |</span><span class=\"padL selectRow\" onclick =\"deleteSelect($SID)\">|  Delete Study  |</span></div>";
+			}
+			else{
+            $ResearchSurvey.= "<div class =\"innerRow\"><span class=\"fifty padL\">$Survey</span><span class=\"padL selectRow\" onclick =\"testSelect($SID)\">|  Edit Study  |</span><span class=\"padL selectRow\" onclick =\"filterSelect($SID)\">|  Add Filter  |</span><span class=\"padL selectRow\" onclick =\"deleteSelect($SID)\">|  Delete Study  |</span></div>";
+			}
         }
     }           
 
 }
 
 echo "<div id=\"surveyBox\" class = \"fLef\">
-    <h3>Your Surveys</h3>
+    <h3>Your Studies</h3>
 
     <div class=\"scroll\"><div >$ResearchSurvey</div></div><br />    
 </div>";
@@ -51,6 +58,20 @@ function filterSelect($SID){
     input = document.createElement("input");
 
 form.action = "filter.php";
+form.method = "post"
+
+input.name = "id";
+input.value = $SID;
+form.appendChild(input);
+
+document.body.appendChild(form);
+form.submit();
+}
+function QualtricsfilterSelect($SID){
+    var form = document.createElement("form");
+    input = document.createElement("input");
+
+form.action = "filterMySurvey.php";
 form.method = "post"
 
 input.name = "id";

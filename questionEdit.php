@@ -1,7 +1,10 @@
 <?php
 session_start();
 include ('header.php');
+?>
 
+<input type="button" class = "cBtn fRight" value="Home" onclick="location='index.php'" />
+<?php
 
 include('ConnectToDb.php');
 //get user menu options based on user level
@@ -28,7 +31,7 @@ if($userLevel != 'Admin')
     exit();
 }
 
-echo "<h2>Edit Question Page</h2>";
+echo "<h2>Edit Question Page</h2><hr />";
 
 if(isset($_POST['id']))
 {
@@ -80,23 +83,24 @@ if(isset($_POST['submitNewAns']))
 	$questID = $_SESSION['questionID'];
 	$newAID = $_SESSION['lastNum'];
 	//check if answer id is greater than 6, if it is then don't run it.
+	
 	if($newAID <= 6)
 	{
-		echo "adding ".$newAnswer." to question with answer id of ".$newAID;
+		//echo "adding ".$newAnswer." to question with answer id of ".$newAID;
 		include('ConnectToDb.php');
 		$sqlAddNewAns = "INSERT INTO Answer (idAnswer,idQuestion,description) VALUES($newAID,$questID,'$newAnswer')";
 		$conn->query($sqlAddNewAns);
 	}
 	else
 	{
-		echo "<strong>Cannot add answer to question, since there is already 6 for this question.</strong>";
+		//echo "<strong>Cannot add answer to question, since there is already 6 for this question.</strong>";
 	}
 	
 }
 
 
 $sqlQuest = "SELECT * FROM Question WHERE idQuestion = $questID";
-$sqlAns = "SELECT * FROM Answer WHERE idQuestion = $questID";
+$sqlAns = "SELECT * FROM Answer WHERE idQuestion = $questID order by idAnswer asc";
 
 include('ConnectToDb.php');
 $resultQuest = $conn->query($sqlQuest);
@@ -123,14 +127,25 @@ $resultAns = $conn->query($sqlAns);
    $QuestionAnswers='';
    $counter = 1;
    //set at 6 for now
-   $_SESSION['lastNum'] = 7;
+
+  	//$_SESSION['lastNum'] = 7;
     if ($resultAns->num_rows > 0){
         // output data of each row
         while($row = $resultAns->fetch_assoc())
          {
+         	
          	$AnswerName = $row['description'];          
             $QID = $row['idQuestion']; 
             $AID = $row['idAnswer'];
+           // echo $AID;
+           // echo $counter;          
+            if($counter != $AID && $counter <= 6)
+            {
+            	$_SESSION['lastNum'] = $counter;
+            }
+            else{
+            	$counter++;
+            }
          	$QuestionAnswers.= "<div class =\"innerRow selectRow\">
             <span class=\"inline\"><strong>$AnswerName</strong></span>        
             <span class=\"inline\" onclick =\"editSelect($AID)\">Edit</span>            
@@ -139,15 +154,28 @@ $resultAns = $conn->query($sqlAns);
             {
             	$_SESSION['lastNum'] = $counter;
             }
-            $counter++;
+            else{
+            	$counter++;
+            }
+            	
+            // echo $_SESSION['lastNum']."<br>";
+            
+            
          }
     } 
+    else
+    {
+    	$_SESSION['lastNum'] = 1;
+    }
+
+    
 //rename answer?
 
 //add answer?
 
 //delete answer?
 //show div box for answer options
+
 echo "<div id=\"surveyBox\" class = \"fLef\">
     <h3>Characterisitics Questions</h3>
 

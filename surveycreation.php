@@ -22,7 +22,7 @@ if ($result->num_rows > 0)
 }
 if($userLevel != 'Admin')
 {
-	if($userLevel != 'Resercher')
+	if($userLevel != 'Resercher' && $userLevel != 'Teacher')
 	{
 		echo"<script>window.location.href = \"index.php\";</script>";
 		exit();
@@ -30,41 +30,69 @@ if($userLevel != 'Admin')
 	
 }
 ?>
-<h2>Survey Creation Page</h2><br>
+<input type="button" class="cBtn fRight" value="Home" onclick="location='index.php'" /><br />
+<h2>Survey Creation Page</h2><hr />
 
 <?php
-if(isset($_POST['submit']))
+if(isset($_POST['create']))
 {
 	$sName = $_POST['surveyName'];
 	$_SESSION['sName'] = $sName;
-	echo "Your survey name: ";
+	$sBG = $_POST['studyBG'];
+	echo "<strong>Your survey name: </strong>";
 	
-	echo $sName."<br/>";
-$surveyType = $_POST['type'];
-$link = $_POST['surveyLink'];
-echo "Your survey type is: ".$surveyType."<br>";
-echo "Your survey link is: ".$link;
-$_SESSION['sType'] = $surveyType;
-include('ConnectToDb.php');
-$sql = "INSERT INTO Survey (idResearcher, description,DateCreate,SurveyType,Link) VALUES ($uvid, '$sName',NOW(),$surveyType,'$link')";
-$conn->query($sql);	
+	//echo $sName."<br/>";
+	$surveyType = $_POST['type'];
+	$link = $_POST['surveyLink'];
+	//echo "<strong>Your survey type is: </strong>".$surveyType."<br>";
+	//echo "<strong>Your survey link is: </strong>".$link."<br />";
+	//echo "<strong>Your survey background is:</strong>".$sBG;
+	//echo "<form action=\"surveycreation.php\" method = \"post\">
+	//<input type=\"submit\" class=\"cBtn\" name=\"addQuestion\" value=\"Add a Question\" />
+	//</form>";
+	$_SESSION['sType'] = $surveyType;
+	include('ConnectToDb.php');
+	$sql = "INSERT INTO Survey (idResearcher, description,DateCreate,SurveyType,Link,background) VALUES ($uvid, '$sName',NOW(),$surveyType,'$link','$sBG')";
+	$conn->query($sql);	
 
+	//get survey Id
+	$sql = "SELECT idSurvey,SurveyType from Survey WHERE description = \"$sName\"";
+	$result = $conn->query($sql);
+	if ($result->num_rows > 0)
+	{
+		$sid = "";
+			// output data of each row
+			while($row = $result->fetch_assoc())
+		{
+			 $sid = $row["idSurvey"];
+			 $_SESSION['idSurvey']= $sid;
+			 $_SESSION['sName'] = $sName;
+			$_SESSION['SType']= $row["SurveyType"];
+		}
+		 
+		   
 
-
-
-
+		
+	} 
+	else {
+		echo "No Survey found.<br>";
+	}
+	echo"<script>window.location.href = \"editSurvey.php\";</script>";
 }
 
 if(isset($_POST['addQuestion']))
 {
 	//session_start();
 	$sName = $_SESSION['sName'];
-
 	createQuestion();
 }
 
 if(isset($_POST['add']))
 {
+echo "<form action=\"surveycreation.php\" method = \"post\">
+<input type=\"submit\" class=\"cBtn\" name=\"addQuestion\" value=\"Add a Question\" />
+</form>";
+
 //session_start();
 $sName = $_SESSION['sName'];
 
@@ -171,7 +199,7 @@ function createQuestion()
 {
 	echo"<h3>Add a Question</h3><br/>";
 
-echo "<form action= '' method='post'>
+echo "<form action= 'surveycreation.php' method='post'>
 Question: &nbsp; <input type='text' name='question' />
 <br /><br/>
 Answer One: &nbsp; <input type='text' name='ans1' />
@@ -186,17 +214,17 @@ Answer Five: &nbsp; <input type='text' name='ans5' />
 <br /><br/>
 Answer Six: &nbsp; <input type='text' name='ans6' />
 <br /><br/>
-<input type='submit' name='add' value = 'Submit'/>
+<input type='submit' class=\"cBtn\" name='add' value = 'Submit'/>
 </form>";
 }
 ?>
 
 <form action="surveycreation.php" method = "post">
-<input type="submit" name="addQuestion" value="Add a Question" />
+<!--<input type="submit" class="cBtn" name="addQuestion" value="Add a Question" />-->
 
 <!--<input type="submit" name="finish" value="Finish" /> -->
 </form>
-<input type="button" value="Back" onclick="location='surveycreationmain.php'" />
+<!--<input type="button" class="cBtn" value="Back" onclick="location='surveycreationmain.php'" />-->
 
 
 <?php
